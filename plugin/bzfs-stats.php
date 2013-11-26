@@ -138,20 +138,20 @@ function bzfs_query($server, $port)
 
     $bzfs_raw_data = bzfquery($server . ":" . $port);
     $bzfs_data = array();
-    $bzfs_data['game_mode']     = $game_styles[$bzfs_raw_data['gameStyle']];
-    $bzfs_data['rogue_count']   = $bzfs_raw_data['rogueMax'];
-    $bzfs_data['red_count']     = $bzfs_raw_data['redMax'];
-    $bzfs_data['green_count']   = $bzfs_raw_data['greenMax'];
-    $bzfs_data['blue_count']    = $bzfs_raw_data['blueMax'];
-    $bzfs_data['purple_count']  = $bzfs_raw_data['purpleMax'];
-    $bzfs_data['flags']         = ($bzfs_raw_data['gameOptions'] & 0x0002);
-    $bzfs_data['jumping']       = ($bzfs_raw_data['gameOptions'] & 0x0008);
-    $bzfs_data['inertia']       = ($bzfs_raw_data['gameOptions'] & 0x0010);
-    $bzfs_data['ricochet']      = ($bzfs_raw_data['gameOptions'] & 0x0020);
-    $bzfs_data['shaking']       = ($bzfs_raw_data['gameOptions'] & 0x0040);
-    $bzfs_data['antidote']      = ($bzfs_raw_data['gameOptions'] & 0x0080);
-    $bzfs_data['handicap']      = ($bzfs_raw_data['gameOptions'] & 0x0100);
-    $bzfs_data['no-team-kills'] = ($bzfs_raw_data['gameOptions'] & 0x0400);
+    $bzfs_data['game_mode']                = $game_styles[$bzfs_raw_data['gameStyle']];
+    $bzfs_data['max_players']['rogue']     = $bzfs_raw_data['rogueMax'];
+    $bzfs_data['max_players']['red']       = $bzfs_raw_data['redMax'];
+    $bzfs_data['max_players']['green']     = $bzfs_raw_data['greenMax'];
+    $bzfs_data['max_players']['blue']      = $bzfs_raw_data['blueMax'];
+    $bzfs_data['max_players']['purple']    = $bzfs_raw_data['purpleMax'];
+    $bzfs_data['options']['flags']         = ($bzfs_raw_data['gameOptions'] & 0x0002);
+    $bzfs_data['options']['jumping']       = ($bzfs_raw_data['gameOptions'] & 0x0008);
+    $bzfs_data['options']['inertia']       = ($bzfs_raw_data['gameOptions'] & 0x0010);
+    $bzfs_data['options']['ricochet']      = ($bzfs_raw_data['gameOptions'] & 0x0020);
+    $bzfs_data['options']['shaking']       = ($bzfs_raw_data['gameOptions'] & 0x0040);
+    $bzfs_data['options']['antidote']      = ($bzfs_raw_data['gameOptions'] & 0x0080);
+    $bzfs_data['options']['handicap']      = ($bzfs_raw_data['gameOptions'] & 0x0100);
+    $bzfs_data['options']['no-team-kills'] = ($bzfs_raw_data['gameOptions'] & 0x0400);
 
     // Store the information in the transient in order to cache it
     set_transient($transient, $bzfs_data, 300);
