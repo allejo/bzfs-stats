@@ -198,6 +198,22 @@ function bzfs_query($server, $port, $static)
     }
 
     $bzfs_data = array();
+
+    $server_all = file_get_contents("http://my.bzflag.org/db/?action=LIST&listformat=plain");
+    $server_list = explode("\n\r", $server_all);
+
+    if (array_search($server . ":" . $port, $server_list) !== false)
+    {
+        $server_name = $server_list[array_search($server . ":" . $port, $server_list)];
+        $server_name = explode(" ", $server_name);
+        $server_ip_index = $server_name[array_search($server_name, $bzfs_raw_data['ip'])];
+
+        for ($i = $server_ip_index; $i < count($server_name); $i++)
+        {
+            $bzfs_data['server_name'] .= $server_name[$i];
+        }
+    }
+
     $bzfs_data['game_mode']                = $game_styles[$bzfs_raw_data['gameStyle']];
     $bzfs_data['max_players']['rogue']     = $bzfs_raw_data['rogueMax'];
     $bzfs_data['max_players']['red']       = $bzfs_raw_data['redMax'];
