@@ -62,54 +62,81 @@ function bzfs_widget_builder($attributes)
         'no-team-kills' => false
     ), $attributes));
 
-    // Our GitHub theme
-    if ($theme == "github")
+    // Make a JSON request to GitHub for a specified user and repository
+    $data = bzfs_query($server, $port);
+
+    // Start building the widget
+    $widget =
+        '<div class="bzfs-stats">'.
+        '<div class="header">' .
+        sprintf('<h2>%s</h2>', $name) .
+        sprintf('<p>%s:%s</p>', $server, $port) .
+        '</div>' .
+        '<h3>Server Details</h3>' .
+        '<ul class="details">' .
+        '<li>' .
+        '<strong>Server Options</strong>' .
+        '<ul class="options">';
+
+    foreach ($data['options'] as $key=>$value)
     {
-        // Make a JSON request to GitHub for a specified user and repository
-        $data = repo_widget_json("github", array('user' => $user, 'repo' => $repo));
-
-        // Our normal size widget
-        if ($size == "normal")
+        if ($value)
         {
-            // Start building the widget
-            $widget =
-                sprintf('<div class="repo-widget github normal">') .
-                sprintf('    <div class="header">') .
-                sprintf('        <a href="%s">%s</a>', $data['url'], $data['name']);
-
-            // Add the Travis build status if it's available
-            if ($travis != '')
-            {
-                $widget .= sprintf('        <img src="%s">', $travis);
-            }
-
-            // Continue building the widget
-            $widget .=
-                sprintf('    </div>') .
-                sprintf('    <div class="information">') .
-                sprintf('        <div class="links">') .
-                sprintf('            <div class="active" rel="%s">HTTP</div>', $data['clone_url']) .
-                sprintf('            <div rel="%s">GIT</div>', $data['git_url']) .
-                sprintf('            <div rel="%s">SSH</div>', $data['ssh_url']) .
-                sprintf('            <input value="%s" readonly onclick="this.select()">', $data['clone_url']) .
-                sprintf('        </div>') .
-                sprintf('        <div class="description">') .
-                sprintf('            <p>%s</p>', $data['description']) .
-                sprintf('        </div>') .
-                sprintf('    </div>') .
-                sprintf('    <ul class="commits">') .
-                sprintf('        <li>') .
-                sprintf('            <div class="info">') .
-                sprintf('                <p class="commit">latest commit <a href="%s">%s</a></p>', $data['last_commit']['url'], $data['last_commit']['hash']) .
-                sprintf('                <p class="timestamp">%s</p>', $data['last_commit']['date']) .
-                sprintf('                <div style="clear:both"></div>') .
-                sprintf('            </div>') .
-                sprintf('            <p class="message">%s by <em>%s</em></p>', $data['last_commit']['message'], $data['last_commit']['author']) .
-                sprintf('        </li>') .
-                sprintf('    </ul>') .
-                sprintf('</div>');
-            }
+            $widget .= sprintf('<li>%s</li>', ucfirst($key));
+        }
     }
+
+    $widget .=
+        '</ul>' .
+        '</li>' .
+        '<li>' .
+        '<strong>Max Players</strong>'.
+        '<ul>';
+
+    foreach ($data['max_players'] as $key=>$value)
+    {
+        if ($value > 0)
+        {
+            $widget .= sprintf('<li>%s: %s<li>', ucfirst($key), $value);
+        }
+    }
+
+    $widget .=
+        '</ul>' .
+        '</li>' .
+        '</ul>';
+
+    if (!empty($data)
+    {
+        $widget .= '<h3>Top Players</h3>';
+
+        if (!empty($data['players']))
+        {
+            $widget .= '<ul class="score">');
+
+            foreach ($data['players'] as $key=>$value)
+            {
+                $widget .= sprintf('<li>%s - %s</li>', $value, $key);
+            }
+
+            $widget .= '</ul>';
+        }
+        else
+        {
+            $widget .= '<div class="inactive">No Active players</div>';
+        }
+    }
+
+    if (empty($data))
+    {
+        $widget .= sprintf('<div class="update">Last updated: %s minutes ago</div>');
+    }
+    else
+    {
+        $widget .= '<div class="update">Server Status: Down</div>';
+    }
+
+    $widget .= '</div>';
 
     // Return the generated HTML
     return $widget;
@@ -152,6 +179,7 @@ function bzfs_query($server, $port)
     $bzfs_data['options']['antidote']      = ($bzfs_raw_data['gameOptions'] & 0x0080);
     $bzfs_data['options']['handicap']      = ($bzfs_raw_data['gameOptions'] & 0x0100);
     $bzfs_data['options']['no-team-kills'] = ($bzfs_raw_data['gameOptions'] & 0x0400);
+    $bzfs_data['players'] = "";
 
     // Store the information in the transient in order to cache it
     set_transient($transient, $bzfs_data, 300);
