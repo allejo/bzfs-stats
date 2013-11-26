@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Repo Widget
-Plugin URI: http://wordpress.org/extend/plugins/repo-widget
-Description: Allows you to insert general GitHub repo information with a short code
+Plugin Name: BZFS Stats
+Plugin URI: http://allejo.me/projects/wordpress/plugins/bzfs-stats
+Description: Allows you to insert server information about a BZFlag server
 Version: 0.8.0
 Author: Vladimir Jimenez
 Author URI: http://allejo.me/
@@ -11,6 +11,8 @@ License: GPL2
 Copyright 2013 Vladimir Jimenez (allejo@me.com)
 */
 
+include('bzfquery.php');
+
 /**
  * The function that gets called to build a repository widget
  *
@@ -18,16 +20,14 @@ Copyright 2013 Vladimir Jimenez (allejo@me.com)
  *
  * @return string The HTML for the widget to be displayed
  */
-function repo_widget_handler($attributes)
+function bzfs_widget_handler($attributes)
 {
     // Load necessary CSS and JS files
-    wp_register_style('repo-widget-css', plugins_url('style.css', __FILE__ ));
-    wp_enqueue_style('repo-widget-css');
-    wp_register_script('repo-widget-js', plugins_url('repo-widget.js', __FILE__ ), array('jquery'));
-    wp_enqueue_script('repo-widget-js');
+    wp_register_style('bzfs-widget-css', plugins_url('style.css', __FILE__ ));
+    wp_enqueue_style('bzfs-widget-css');
 
     // Build the HTML for the widget
-    $repo_widget = repo_widget_builder($attributes);
+    $repo_widget = bzfs_widget_builder($attributes);
 
     // Return the widget HTML to be displayed
     return $repo_widget;
@@ -40,20 +40,26 @@ function repo_widget_handler($attributes)
  *
  * @return string The HTML for the widget to be displayed
  */
-function repo_widget_builder($attributes)
+function bzfs_widget_builder($attributes)
 {
     $widget = ""; // We'll store the HTML here
 
     // Get all the parameters that were passed in the short code and save them in variables
     // Here are our default values in case the parameters were not passed
     extract(shortcode_atts(array(
-        'host' => 'github',
-        'user' => 'octocat',
-        'repo' => 'Hello-World',
-        'size' => 'normal',
-        'commits' => '1',
-        'theme' => 'github',
-        'travis' => ''
+        'name' => 'My First Server',
+        'server' => 'localhost',
+        'port' => '5154',
+        'mode' => 'FFA',
+        'players' => '0,0,0,0,0,0',
+        'flags' => false,
+        'jumping' => false,
+        'inertia' => false,
+        'ricochet' => false,
+        'shaking' => false,
+        'antidote' => false,
+        'handicap' => false,
+        'no-team-kills' => false
     ), $attributes));
 
     // Our GitHub theme
@@ -110,16 +116,18 @@ function repo_widget_builder($attributes)
 }
 
 /**
- * Make a JSON request and get required information
+ * Make a query to a BZFlag server and port to get the information
  *
- * @param $host string The respective host to make the JSON query to
- * @param $array array An array of values to be passed that will be used to make the GET query
+ * @param $server string The hostname of the server
+ * @param $port int The port number of the server
  *
- * @return array|mixed The necessary information retrieved from the JSON query
+ * @return array|mixed The information retrieved from the query or the transient
  */
-function repo_widget_json($host, $array)
+function bzfs_query($server, $port)
 {
-    $transient = "repo-widget_" . $array['user'] . "-" . $array['repo']; // Build a name for the transient so we can "cache" information
+    $game_styles = array('TeamFFA', 'ClassicCTF', 'OpenFFA', 'RabbitChase');
+
+    $transient = "bzfs-widget_" . $server . "-" . $port; // Build a name for the transient so we can "cache" information
 	$status = get_transient($transient); // Check whether or not the transient exists
 
     // If the transient exists, return that
@@ -128,44 +136,29 @@ function repo_widget_json($host, $array)
         return $status;
     }
 
-    // Make a JSON query to GitHub
-    if ($host == "github")
-    {
-        $repo_location = $array['user'] . '/' . $array['repo']; // The user and repository name combination used to build the URL
+    $bzfs_raw_data = bzfquery($server . ":" . $port);
+    $bzfs_data = array();
+    $bzfs_data['game_mode']     = $game_styles[$bzfs_raw_data['gameStyle']];
+    $bzfs_data['rogue_count']   = $bzfs_raw_data['rogueMax'];
+    $bzfs_data['red_count']     = $bzfs_raw_data['redMax'];
+    $bzfs_data['green_count']   = $bzfs_raw_data['greenMax'];
+    $bzfs_data['blue_count']    = $bzfs_raw_data['blueMax'];
+    $bzfs_data['purple_count']  = $bzfs_raw_data['purpleMax'];
+    $bzfs_data['flags']         = ($bzfs_raw_data['gameOptions'] & 0x0002);
+    $bzfs_data['jumping']       = ($bzfs_raw_data['gameOptions'] & 0x0008);
+    $bzfs_data['inertia']       = ($bzfs_raw_data['gameOptions'] & 0x0010);
+    $bzfs_data['ricochet']      = ($bzfs_raw_data['gameOptions'] & 0x0020);
+    $bzfs_data['shaking']       = ($bzfs_raw_data['gameOptions'] & 0x0040);
+    $bzfs_data['antidote']      = ($bzfs_raw_data['gameOptions'] & 0x0080);
+    $bzfs_data['handicap']      = ($bzfs_raw_data['gameOptions'] & 0x0100);
+    $bzfs_data['no-team-kills'] = ($bzfs_raw_data['gameOptions'] & 0x0400);
 
-        // Retrieve information about the repository itself
-        $repo_data  = json_decode(file_get_contents("https://api.github.com/repos/" . $repo_location), TRUE);
+    // Store the information in the transient in order to cache it
+    set_transient($transient, $bzfs_data, 300);
 
-        // Retrieve the last commit
-        $commit_sha = json_decode(file_get_contents("https://api.github.com/repos/" . $repo_location . "/git/refs/heads/master"), TRUE);
-
-        // Retrieve information about the last commit
-        $commit     = json_decode(file_get_contents("https://api.github.com/repos/" . $repo_location . "/git/commits/" . $commit_sha['object']['sha']), TRUE);
-
-        // We'll build a DateTime object from our last commit time
-        $date       = new DateTime($commit['author']['date']);
-
-        // Store the necessary information in an array for easy access
-        $repo_information = array();
-        $repo_information['name'] = $repo_data['name'];
-        $repo_information['url'] = $repo_data['html_url'];
-        $repo_information['clone_url'] = $repo_data['clone_url'];
-        $repo_information['git_url'] = $repo_data['git_url'];
-        $repo_information['ssh_url'] = $repo_data['ssh_url'];
-        $repo_information['description'] = $repo_data['description'];
-        $repo_information['last_commit']['hash'] = substr($commit_sha['object']['sha'], 0, 10);
-        $repo_information['last_commit']['url'] = $commit['html_url'];
-        $repo_information['last_commit']['date'] = $date->format("D M j G:i:s Y");
-        $repo_information['last_commit']['message'] = $commit['message'];
-        $repo_information['last_commit']['author'] = $commit['author']['name'];
-
-        // Store the information in the transient in order to cache it
-        set_transient($transient, $repo_information, 90);
-
-        // Return our array of information
-        return $repo_information;
-    }
+    // Return our array of information
+    return $bzfs_data;
 }
 
-// Register the 'repo' short code and make the handler function the main function
-add_shortcode('repo', 'repo_widget_handler');
+// Register the 'bzfs' short code and make the handler function the main function
+add_shortcode('bzfs', 'bzfs_widget_handler');
