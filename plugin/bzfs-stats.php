@@ -14,7 +14,7 @@ Copyright 2013 Vladimir Jimenez (allejo@me.com)
 include('bzfquery.php');
 
 /**
- * The function that gets called to build a repository widget
+ * The function that gets called to build a BZFS widget
  *
  * @param $attributes array Parameters that are passed in the short code
  *
@@ -27,10 +27,10 @@ function bzfs_widget_handler($attributes)
     wp_enqueue_style('bzfs-widget-css');
 
     // Build the HTML for the widget
-    $repo_widget = bzfs_widget_builder($attributes);
+    $bzfs_widget = bzfs_widget_builder($attributes);
 
     // Return the widget HTML to be displayed
-    return $repo_widget;
+    return $bzfs_widget;
 }
 
 /**
