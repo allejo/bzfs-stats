@@ -52,6 +52,7 @@ function bzfs_widget_builder($attributes)
         'port' => '5154',
         'mode' => 'FFA',
         'players' => '0,0,0,0,0,0',
+        'static' => false,
         'flags' => false,
         'jumping' => false,
         'inertia' => false,
@@ -59,11 +60,11 @@ function bzfs_widget_builder($attributes)
         'shaking' => false,
         'antidote' => false,
         'handicap' => false,
-        'no-team-kills' => false
+        'noteamkills' => false
     ), $attributes));
 
     // Make a JSON request to GitHub for a specified user and repository
-    $data = bzfs_query($server, $port);
+    $data = bzfs_query($server, $port, $static);
 
     // Start building the widget
     $widget =
@@ -78,26 +79,47 @@ function bzfs_widget_builder($attributes)
         '<strong>Server Options</strong>' .
         '<ul class="options">';
 
-    foreach ($data['options'] as $key=>$value)
+    if ($static)
     {
-        if ($value)
+        ($flags) ? "<li>Flags</li>": "";
+        ($jumping) ? "<li>Jumping</li>": "";
+        ($inertia) ? "<li>Inertia</li>": "";
+        ($ricochet) ? "<li>Ricochet</li>": "";
+        ($shaking) ? "<li>Shaking</li>": "";
+        ($antidote) ? "<li>Antidote</li>": "";
+        ($handicap) ? "<li>Handicap</li>": "";
+        ($noteamkills) ? "<li>No-team-kills</li>": "";
+    }
+    else
+    {
+        foreach ($data['options'] as $key=>$value)
         {
-            $widget .= sprintf('<li>%s</li>', ucfirst($key));
+            if ($value)
+            {
+                $widget .= sprintf('<li>%s</li>', ucfirst($key));
+            }
         }
     }
 
     $widget .=
         '</ul>' .
-        '</li>' .
-        '<li>' .
-        '<strong>Max Players</strong>'.
-        '<ul>';
+        '</li>';
 
-    foreach ($data['max_players'] as $key=>$value)
+    if (!empty($data['max_players']) || !is_null($players))
     {
-        if ($value > 0)
+        $widget .=
+            '<li>' .
+            '<strong>Max Players</strong>'.
+            '<ul>';
+
+        $players = ($static) ? parsePlayers($players) : $data['max_players'];
+
+        foreach ($players as $key=>$value)
         {
-            $widget .= sprintf('<li>%s: %s<li>', ucfirst($key), $value);
+            if ($value > 0)
+            {
+                $widget .= sprintf('<li>%s: %s<li>', ucfirst($key), $value);
+            }
         }
     }
 
@@ -150,8 +172,13 @@ function bzfs_widget_builder($attributes)
  *
  * @return array|mixed The information retrieved from the query or the transient
  */
-function bzfs_query($server, $port)
+function bzfs_query($server, $port, $static)
 {
+    if ($static)
+    {
+        return null;
+    }
+
     $game_styles = array('TeamFFA', 'ClassicCTF', 'OpenFFA', 'RabbitChase');
 
     $transient = "bzfs-widget_" . $server . "-" . $port; // Build a name for the transient so we can "cache" information
@@ -164,6 +191,12 @@ function bzfs_query($server, $port)
     }
 
     $bzfs_raw_data = bzfquery($server . ":" . $port);
+
+    if (!is_array($bzfs_raw_data))
+    {
+        return NULL;
+    }
+
     $bzfs_data = array();
     $bzfs_data['game_mode']                = $game_styles[$bzfs_raw_data['gameStyle']];
     $bzfs_data['max_players']['rogue']     = $bzfs_raw_data['rogueMax'];
@@ -186,6 +219,31 @@ function bzfs_query($server, $port)
 
     // Return our array of information
     return $bzfs_data;
+}
+
+/**
+ * Parse max players and return an array of players
+ *
+ * @param $players string A string of max players separataed by commas
+ *
+ * @return array|null Either an array of max players or NULL if an invalid format
+ */
+function parsePlayers($players)
+{
+    $players = explode(',', $players);
+
+    if ((count($players) != 5 || count($players) != 6) && array_filter($players, 'is_int') === false)
+    {
+        return NULL;
+    }
+
+    $data['max_players']['rogue']  = $players[0];
+    $data['max_players']['red']    = $players[1];
+    $data['max_players']['green']  = $players[2];
+    $data['max_players']['blue']   = $players[3];
+    $data['max_players']['purple'] = $players[4];
+
+    return $data;
 }
 
 // Register the 'bzfs' short code and make the handler function the main function
