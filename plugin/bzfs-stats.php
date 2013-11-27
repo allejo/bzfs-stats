@@ -42,8 +42,6 @@ function bzfs_widget_handler($attributes)
  */
 function bzfs_widget_builder($attributes)
 {
-    $widget = ""; // We'll store the HTML here
-
     // Get all the parameters that were passed in the short code and save them in variables
     // Here are our default values in case the parameters were not passed
     extract(shortcode_atts(array(
