@@ -1,6 +1,6 @@
 .bzfs-stats {
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  margin: 0 auto;
+  margin: 20px auto;
   width: 400px;
 }
 .bzfs-stats h3 {
