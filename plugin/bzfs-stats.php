@@ -112,9 +112,9 @@ function bzfs_widget_builder($attributes)
             '<strong>Max Players</strong>'.
             '<ul>';
 
-        $players = ($static) ? parsePlayers($players) : $data['max_players'];
+        $players_array = ($static) ? parsePlayers($players) : $data['max_players'];
 
-        foreach ($players as $key=>$value)
+        foreach ($players_array as $key=>$value)
         {
             if ($value > 0)
             {
