@@ -1,49 +1,62 @@
 .bzfs-stats {
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  margin: 10px;
-  width: 400px; }
-  .bzfs-stats h3 {
-    font-weight: normal;
-    margin: 0; }
-  .bzfs-stats ul {
-    margin: 0 0 0 10px;
-    padding: 0; }
-    .bzfs-stats ul li {
-      list-style: none;
-      margin: 0; }
-  .bzfs-stats .header {
-    border-bottom: 2px solid #ffb78a;
-    margin-bottom: 5px;
-    padding-bottom: 5px; }
-    .bzfs-stats .header h2 {
-      font-size: 22px;
-      font-weight: 100;
-      margin: 0; }
-    .bzfs-stats .header p {
-      font-size: 14px;
-      margin: 0 0 0 20px; }
-  .bzfs-stats .details {
-    margin-bottom: 10px; }
-    .bzfs-stats .details li {
-      display: inline-block;
-      font-size: 13px;
-      vertical-align: top;
-      width: 49%; }
-      .bzfs-stats .details li .options li {
-        display: block; }
-  .bzfs-stats .score li {
-    font-size: 13px; }
-  .bzfs-stats .inactive {
-    color: #b1b1b1;
-    font-size: 12px;
-    margin-left: 20px;
-    margin-top: 5px;
-    width: 100%; }
-  .bzfs-stats .update {
-    border-top: 1px solid #b1b1b1;
-    color: #b1b1b1;
-    font-size: 12px;
-    font-style: italic;
-    margin-top: 10px;
-    padding-top: 5px;
-    text-align: right; }
+  margin: 0 auto;
+  width: 400px;
+}
+.bzfs-stats h3 {
+  font-weight: normal;
+  margin: 0;
+}
+.bzfs-stats ul {
+  margin: 0 0 0 10px;
+  padding: 0;
+}
+.bzfs-stats ul li {
+  list-style: none;
+  margin: 0;
+}
+.bzfs-stats .header {
+  border-bottom: 2px solid #ffb78a;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+}
+.bzfs-stats .header h2 {
+  font-size: 22px;
+  font-weight: 100;
+  margin: 0;
+}
+.bzfs-stats .header p {
+  font-size: 14px;
+  margin: 0 0 0 20px;
+}
+.bzfs-stats .details {
+  margin-bottom: 10px;
+}
+.bzfs-stats .details li {
+  display: inline-block;
+  font-size: 13px;
+  vertical-align: top;
+  width: 49%;
+}
+.bzfs-stats .details li .options li {
+  display: block;
+}
+.bzfs-stats .score li {
+  font-size: 13px;
+}
+.bzfs-stats .inactive {
+  color: #b1b1b1;
+  font-size: 12px;
+  margin-left: 20px;
+  margin-top: 5px;
+  width: 100%;
+}
+.bzfs-stats .update {
+  border-top: 1px solid #b1b1b1;
+  color: #b1b1b1;
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 10px;
+  padding-top: 5px;
+  text-align: right;
+}

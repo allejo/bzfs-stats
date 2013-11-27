@@ -151,7 +151,7 @@ function bzfs_widget_builder($attributes)
 
     if (!empty($data))
     {
-        $widget .= sprintf('<div class="update">Last updated: %s minutes ago</div>');
+        $widget .= sprintf('<div class="update">Last updated: %s minutes ago</div>', round(((time() - $data['last_update']) / 60), 0));
     }
     else
     {
@@ -235,6 +235,7 @@ function bzfs_query($server, $port, $static)
     }
 
     $bzfs_data['game_mode']                = $game_styles[$bzfs_raw_data['gameStyle']];
+    $bzfs_data['last_update']              = time();
     $bzfs_data['max_players']['rogue']     = $bzfs_raw_data['rogueMax'];
     $bzfs_data['max_players']['red']       = $bzfs_raw_data['redMax'];
     $bzfs_data['max_players']['green']     = $bzfs_raw_data['greenMax'];
