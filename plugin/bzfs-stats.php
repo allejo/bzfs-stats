@@ -151,7 +151,16 @@ function bzfs_widget_builder($attributes)
 
     if (!empty($data))
     {
-        $widget .= sprintf('<div class="update">Last updated: %s minutes ago</div>', round(((time() - $data['last_update']) / 60), 0));
+        $last_time = round(((time() - $data['last_update']) / 60), 0);
+
+        if ($last_time >= 1)
+        {
+            $widget .= sprintf('<div class="update">Last updated: %s minute%s ago</div>', $last_time, ($last_time == 1) ? "" : "s");
+        }
+        else
+        {
+            $widget .= '<div class="update">Last updated: Just now</div>';
+        }
     }
     else
     {
