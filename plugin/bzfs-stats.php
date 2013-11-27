@@ -51,6 +51,7 @@ function bzfs_widget_builder($attributes)
         'mode' => 'FFA',
         'players' => '0,0,0,0,0,0',
         'static' => 'false',
+        'header' => 'visible',
         'flags' => 'false',
         'jumping' => 'false',
         'inertia' => 'false',
@@ -65,18 +66,23 @@ function bzfs_widget_builder($attributes)
     $data = bzfs_query($server, $port, $static);
 
     // Start building the widget
-    $widget =
-        '<div class="bzfs-stats">'.
-        '<div class="header">' .
-        sprintf('<h2>%s</h2>', (empty($data['server_name']) ? $name : $data['server_name']));
+    $widget = '<div class="bzfs-stats">';
 
-    if ($static != 'true')
+    if ($header == 'visible')
     {
-        $widget .= sprintf('<p>%s:%s</p>', $server, $port);
+        $widget .=
+            '<div class="header">' .
+            sprintf('<h2>%s</h2>', (empty($data['server_name']) ? $name : $data['server_name']));
+
+        if ($static != 'true')
+        {
+            $widget .= sprintf('<p>%s:%s</p>', $server, $port);
+        }
+
+        $widget .= '</div>';
     }
 
     $widget .=
-        '</div>' .
         '<h3>Server Details</h3>' .
         '<ul class="details">' .
         '<li>' .
