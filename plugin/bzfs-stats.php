@@ -128,13 +128,13 @@ function bzfs_widget_builder($attributes)
         '</li>' .
         '</ul>';
 
-    if (!empty($data)
+    if (!empty($data))
     {
         $widget .= '<h3>Top Players</h3>';
 
         if (!empty($data['players']))
         {
-            $widget .= '<ul class="score">');
+            $widget .= '<ul class="score">';
 
             foreach ($data['players'] as $key=>$value)
             {
@@ -149,7 +149,7 @@ function bzfs_widget_builder($attributes)
         }
     }
 
-    if (empty($data))
+    if (!empty($data))
     {
         $widget .= sprintf('<div class="update">Last updated: %s minutes ago</div>');
     }
@@ -169,6 +169,7 @@ function bzfs_widget_builder($attributes)
  *
  * @param $server string The hostname of the server
  * @param $port int The port number of the server
+ * @param $static bool Whether or not to display static information or to query servers
  *
  * @return array|mixed The information retrieved from the query or the transient
  */
