@@ -70,7 +70,7 @@ function bzfs_widget_builder($attributes)
     $widget =
         '<div class="bzfs-stats">'.
         '<div class="header">' .
-        sprintf('<h2>%s</h2>', $name) .
+        sprintf('<h2>%s</h2>', (empty($data['server_name']) ? $name : $data['server_name'])) .
         sprintf('<p>%s:%s</p>', $server, $port) .
         '</div>' .
         '<h3>Server Details</h3>' .
@@ -201,17 +201,36 @@ function bzfs_query($server, $port, $static)
     $bzfs_data = array();
 
     $server_all = file_get_contents("http://my.bzflag.org/db/?action=LIST&listformat=plain");
-    $server_list = explode("\n\r", $server_all);
+    $server_list = explode("\n", $server_all);
 
-    if (array_search($server . ":" . $port, $server_list) !== false)
+    $indexID = -1;
+
+    foreach($server_list as $key => $value)
     {
-        $server_name = $server_list[array_search($server . ":" . $port, $server_list)];
-        $server_name = explode(" ", $server_name);
-        $server_ip_index = $server_name[array_search($server_name, $bzfs_raw_data['ip'])];
-
-        for ($i = $server_ip_index; $i < count($server_name); $i++)
+        if (substr_count(strtolower($value), strtolower($server . ":" . $port)) > 0 )
         {
-            $bzfs_data['server_name'] .= $server_name[$i];
+            $indexID = $key;
+        }
+    }
+
+    if ($indexID >= 0)
+    {
+        $server_name = $server_list[$indexID];
+        $server_name = explode(" ", $server_name);
+        $foundTitle = false;
+
+        foreach ($server_name as $field)
+        {
+            if ($field == $bzfs_raw_data['ip'])
+            {
+                $foundTitle = true;
+                continue;
+            }
+
+            if ($foundTitle)
+            {
+                $bzfs_data['server_name'] .= $field . " ";
+            }
         }
     }
 
