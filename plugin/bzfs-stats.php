@@ -50,15 +50,15 @@ function bzfs_widget_builder($attributes)
         'port' => '5154',
         'mode' => 'FFA',
         'players' => '0,0,0,0,0,0',
-        'static' => false,
-        'flags' => false,
-        'jumping' => false,
-        'inertia' => false,
-        'ricochet' => false,
-        'shaking' => false,
-        'antidote' => false,
-        'handicap' => false,
-        'noteamkills' => false
+        'static' => 'false',
+        'flags' => 'false',
+        'jumping' => 'false',
+        'inertia' => 'false',
+        'ricochet' => 'false',
+        'shaking' => 'false',
+        'antidote' => 'false',
+        'handicap' => 'false',
+        'noteamkills' => 'false'
     ), $attributes));
 
     // Make a JSON request to GitHub for a specified user and repository
@@ -68,8 +68,14 @@ function bzfs_widget_builder($attributes)
     $widget =
         '<div class="bzfs-stats">'.
         '<div class="header">' .
-        sprintf('<h2>%s</h2>', (empty($data['server_name']) ? $name : $data['server_name'])) .
-        sprintf('<p>%s:%s</p>', $server, $port) .
+        sprintf('<h2>%s</h2>', (empty($data['server_name']) ? $name : $data['server_name']));
+
+    if ($static != 'true')
+    {
+        $widget .= sprintf('<p>%s:%s</p>', $server, $port);
+    }
+
+    $widget .=
         '</div>' .
         '<h3>Server Details</h3>' .
         '<ul class="details">' .
@@ -77,16 +83,16 @@ function bzfs_widget_builder($attributes)
         '<strong>Server Options</strong>' .
         '<ul class="options">';
 
-    if ($static)
+    if ($static == 'true')
     {
-        ($flags) ? "<li>Flags</li>": "";
-        ($jumping) ? "<li>Jumping</li>": "";
-        ($inertia) ? "<li>Inertia</li>": "";
-        ($ricochet) ? "<li>Ricochet</li>": "";
-        ($shaking) ? "<li>Shaking</li>": "";
-        ($antidote) ? "<li>Antidote</li>": "";
-        ($handicap) ? "<li>Handicap</li>": "";
-        ($noteamkills) ? "<li>No-team-kills</li>": "";
+        $widget .= ($flags == 'true') ? "<li>Flags</li>" : "";
+        $widget .= ($jumping == 'true') ? "<li>Jumping</li>" : "";
+        $widget .= ($inertia == 'true') ? "<li>Inertia</li>" : "";
+        $widget .= ($ricochet == 'true') ? "<li>Ricochet</li>" : "";
+        $widget .= ($shaking == 'true') ? "<li>Shaking</li>" : "";
+        $widget .= ($antidote == 'true') ? "<li>Antidote</li>" : "";
+        $widget .= ($handicap == 'true') ? "<li>Handicap</li>" : "";
+        $widget .= ($noteamkills == 'true') ? "<li>No-team-kills</li>" : "";
     }
     else
     {
@@ -110,7 +116,7 @@ function bzfs_widget_builder($attributes)
             '<strong>Max Players</strong>'.
             '<ul>';
 
-        $players_array = ($static) ? parsePlayers($players) : $data['max_players'];
+        $players_array = ($static == 'true') ? parsePlayers($players) : $data['max_players'];
 
         foreach ($players_array as $key=>$value)
         {
@@ -182,7 +188,7 @@ function bzfs_widget_builder($attributes)
  */
 function bzfs_query($server, $port, $static)
 {
-    if ($static)
+    if ($static == 'true')
     {
         return null;
     }
@@ -281,11 +287,11 @@ function parsePlayers($players)
         return NULL;
     }
 
-    $data['max_players']['rogue']  = $players[0];
-    $data['max_players']['red']    = $players[1];
-    $data['max_players']['green']  = $players[2];
-    $data['max_players']['blue']   = $players[3];
-    $data['max_players']['purple'] = $players[4];
+    $data['rogue']  = $players[0];
+    $data['red']    = $players[1];
+    $data['green']  = $players[2];
+    $data['blue']   = $players[3];
+    $data['purple'] = $players[4];
 
     return $data;
 }
